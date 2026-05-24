@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parqueadero Inteligente - Software Residencial</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-box">
+            <div class="login-logo">
+                <div class="logo-icon">LPR</div>
+            </div>
+            <h1>Software Inteligente de Parqueadero</h1>
+            <p class="login-subtitle">Ingreso privado. Funciona en Mac y Windows sin internet.</p>
+            <div class="login-form">
+                <label>Usuario</label>
+                <input type="text" id="login-user" value="admin" placeholder="Usuario">
+                <label>Contrasena</label>
+                <input type="password" id="login-pass" value="admin123" placeholder="Contrasena">
+                <button onclick="doLogin()" class="btn-primary">Ingresar al sistema</button>
+                <p class="login-hint">Usuario de prueba: admin / Clave: admin123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app" class="app hidden">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon-small">LPR</div>
+                <div>
+                    <h3>Parqueadero Inteligente</h3>
+                    <span>Mac / Windows / offline</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="showSection('dashboard')">
+                    <span class="nav-icon">📊</span> Dashboard
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('ingreso')">
+                    <span class="nav-icon">🚗</span> Ingreso automatico LPR
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('vehiculos')">
+                    <span class="nav-icon">🅿️</span> Vehiculos dentro
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('residentes')">
+                    <span class="nav-icon">👥</span> Residentes / Excel CSV
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('camaras')">
+                    <span class="nav-icon">📷</span> Camaras LPR / Facial
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('ticket')">
+                    <span class="nav-icon">🎫</span> Ticket de cobro
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('historial')">
+                    <span class="nav-icon">📋</span> Historial completo
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('alertas')">
+                    <span class="nav-icon">⚠️</span> Alertas
+                    <span id="alert-badge" class="badge hidden">0</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('config')">
+                    <span class="nav-icon">⚙️</span> Configuracion
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('disponibilidad')">
+                    <span class="nav-icon">📺</span> Pantalla disponibilidad
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="doLogout()" class="btn-logout">Cerrar sesion</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <h2 id="page-title">Dashboard</h2>
+                <p id="page-subtitle">Control de carros, motos, residentes, visitantes, Airbnb, facial, alertas, cobros y tiquetera.</p>
+                <div class="status-badge">
+                    <span class="status-dot"></span> Sistema local activo
+                </div>
+            </header>
+
+            <!-- DASHBOARD -->
+            <section id="section-dashboard" class="content-section">
+                <div class="stats-grid">
+                    <div class="stat-card"><span class="stat-label">Carros autorizados</span><span id="stat-carros-aut" class="stat-value">150</span></div>
+                    <div class="stat-card"><span class="stat-label">Carros dentro</span><span id="stat-carros-dentro" class="stat-value">0</span></div>
+                    <div class="stat-card"><span class="stat-label">Carros disponibles</span><span id="stat-carros-disp" class="stat-value">150</span></div>
+                    <div class="stat-card"><span class="stat-label">Ocupacion carros</span><span id="stat-carros-ocup" class="stat-value">0.0%</span></div>
+                    <div class="stat-card"><span class="stat-label">Motos autorizadas</span><span id="stat-motos-aut" class="stat-value">300</span></div>
+                    <div class="stat-card"><span class="stat-label">Motos dentro</span><span id="stat-motos-dentro" class="stat-value">0</span></div>
+                    <div class="stat-card"><span class="stat-label">Motos disponibles</span><span id="stat-motos-disp" class="stat-value">300</span></div>
+                    <div class="stat-card"><span class="stat-label">Ocupacion motos</span><span id="stat-motos-ocup" class="stat-value">0.0%</span></div>
+                </div>
+                <div class="dashboard-bottom">
+                    <div class="panel">
+                        <h3>Alertas activas</h3>
+                        <div id="dashboard-alertas" class="alert-list"><p class="empty">Sin alertas activas.</p></div>
+                    </div>
+                    <div class="panel">
+                        <h3>Ultimos ingresos</h3>
+                        <table class="data-table small">
+                            <thead><tr><th>Placa</th><th>Tipo</th><th>Modalidad</th><th>Destino</th><th>Ingreso</th></tr></thead>
+                            <tbody id="ultimos-ingresos"><tr><td colspan="5" class="empty">Sin ingresos recientes</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- INGRESO AUTOMATICO LPR -->
+            <section id="section-ingreso" class="content-section hidden">
+                <div class="ingreso-container">
+                    <div class="ingreso-left">
+                        <div class="camera-box">
+                            <h4>Camara LPR</h4>
+                            <div class="plate-display" id="plate-display">AAA-123</div>
+                            <p id="plate-status">Formato carro Colombia valido</p>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>Camara LPR</label><select id="cam-lpr"><option>Entrada principal LPR</option></select></div>
+                            <div class="form-group"><label>Camara facial</label><select id="cam-facial"><option>Facial porteria</option></select></div>
+                            <div class="form-group"><label>Placa</label><input type="text" id="ingreso-placa" placeholder="AAA-123 / AAA123 / AAA-12A" value="AAA-123"></div>
+                            <div class="form-group"><label>Tipo detectado</label><select id="ingreso-tipo"><option value="carro">Carro</option><option value="moto">Moto</option></select></div>
+                            <div class="form-group"><label>Modalidad</label><select id="ingreso-modalidad" onchange="onModalidadChange()"><option value="residente">Residente</option><option value="visitante">Visitante</option><option value="airbnb">Airbnb</option></select></div>
+                            <div class="form-group"><label>Apartamento / destino</label><input type="text" id="ingreso-destino" placeholder="Torre 1 Apto 101"></div>
+                            <div class="form-group"><label>Conductor</label><input type="text" id="ingreso-conductor" placeholder="Nombre del conductor"></div>
+                            <div id="airbnb-fields" class="airbnb-fields hidden">
+                                <div class="form-group full-width"><label>Fecha y hora de ingreso autorizada</label><input type="datetime-local" id="airbnb-ingreso"></div>
+                                <div class="form-group full-width"><label>Fecha y hora de salida autorizada</label><input type="datetime-local" id="airbnb-salida"></div>
+                                <div class="form-group full-width"><label>Documento / ID huesped</label><input type="text" id="airbnb-documento" placeholder="Numero de documento"></div>
+                                <div class="form-group full-width"><label>Telefono huesped</label><input type="text" id="airbnb-telefono" placeholder="300 000 0000"></div>
+                            </div>
+                            <div id="tiempo-autorizado-fields" class="tiempo-fields">
+                                <div class="form-group tiempo-box"><label>Dias</label><input type="number" id="ingreso-dias" value="0" min="0" placeholder="Dias"></div>
+                                <div class="form-group tiempo-box"><label>Horas</label><input type="number" id="ingreso-horas" value="0" min="0" max="23" placeholder="Horas"></div>
+                                <div class="form-group tiempo-box"><label>Minutos</label><input type="number" id="ingreso-minutos" value="0" min="0" max="59" placeholder="Minutos"></div>
+                            </div>
+                            <div class="form-group"><label>Facial</label><select id="ingreso-facial"><option>Pendiente</option><option>Verificado</option></select></div>
+                        </div>
+                        <div class="btn-group">
+                            <button onclick="simularLPR()" class="btn-secondary">Simular lectura LPR</button>
+                            <button onclick="registrarIngreso()" class="btn-primary">Registrar ingreso</button>
+                            <button onclick="limpiarIngreso()" class="btn-ghost">Limpiar</button>
+                        </div>
+                    </div>
+                    <div class="ingreso-right">
+                        <div class="camera-box facial-box">
+                            <h4>Reconocimiento facial residente</h4>
+                            <div class="face-circle"><span>FACE ID</span></div>
+                            <p>Pendiente validacion facial</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VEHICULOS DENTRO -->
+            <section id="section-vehiculos" class="content-section hidden">
+                <div class="panel">
+                    <h3>Vehiculos actualmente dentro</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Placa</th><th>Tipo</th><th>Modalidad</th><th>Destino</th><th>Facial</th><th>Ingreso</th><th>Tiempo</th><th>Cobro</th><th>Ticket/Salida</th></tr></thead>
+                        <tbody id="tabla-vehiculos"><tr><td colspan="9" class="empty">No hay vehiculos dentro</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- RESIDENTES -->
+            <section id="section-residentes" class="content-section hidden">
+                <div class="panel">
+                    <h3>Cargar base de residentes</h3>
+                    <p class="help-text">Use CSV exportado desde Excel. Columnas: placa, propietario, apartamento, tipo, documento, telefono, rostro_id</p>
+                    <div class="file-upload">
+                        <input type="file" id="csv-file" accept=".csv" onchange="onCSVSelect()">
+                        <label for="csv-file" class="btn-file">Seleccionar archivo</label>
+                        <span id="csv-filename">Sin archivos seleccionados</span>
+                    </div>
+                    <div class="btn-group">
+                        <button onclick="importarCSV()" class="btn-primary">Importar residentes</button>
+                        <button onclick="reemplazarCSV()" class="btn-warning">Reemplazar base (conserva historial)</button>
+                        <button onclick="descargarPlantilla()" class="btn-secondary">Descargar plantilla</button>
+                    </div>
+                </div>
+
+                <!-- AGREGAR/EDITAR RESIDENTE MANUAL -->
+                <div class="panel">
+                    <h3 id="residente-form-title">Agregar residente manual</h3>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Placa *</label><input type="text" id="res-placa" placeholder="ABC-123"></div>
+                        <div class="form-group"><label>Propietario *</label><input type="text" id="res-propietario" placeholder="Nombre completo"></div>
+                        <div class="form-group"><label>Apartamento *</label><input type="text" id="res-apartamento" placeholder="Torre 1 Apto 101"></div>
+                        <div class="form-group"><label>Tipo</label><select id="res-tipo"><option value="carro">Carro</option><option value="moto">Moto</option></select></div>
+                        <div class="form-group"><label>Documento</label><input type="text" id="res-documento" placeholder="Numero de documento"></div>
+                        <div class="form-group"><label>Telefono</label><input type="text" id="res-telefono" placeholder="300 000 0000"></div>
+                        <div class="form-group"><label>Rostro ID</label><input type="text" id="res-rostro" placeholder="FACE-001"></div>
+                    </div>
+                    <div class="btn-group">
+                        <button onclick="guardarResidente()" class="btn-primary" id="btn-guardar-res">Guardar residente</button>
+                        <button onclick="cancelarEdicionRes()" class="btn-ghost" id="btn-cancelar-res" style="display:none;">Cancelar</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Residentes censados</h3>
+                        <button onclick="eliminarTodosResidentes()" class="btn-danger-small">Eliminar todos</button>
+                    </div>
+                    <table class="data-table">
+                        <thead><tr><th>Placa</th><th>Propietario</th><th>Apartamento</th><th>Tipo</th><th>Documento</th><th>Telefono</th><th>Rostro ID</th><th>Acciones</th></tr></thead>
+                        <tbody id="tabla-residentes">
+                            <tr><td>ABC-123</td><td>Residente ejemplo</td><td>Torre 1 Apto 502</td><td>carro</td><td>123456</td><td></td><td>FACE-001</td><td><button class="btn-small-edit" onclick="editarResidente(0)">Editar</button><button class="btn-small" onclick="eliminarResidente(0)">Eliminar</button></td></tr>
+                            <tr><td>XYZ-12A</td><td>Residente moto</td><td>Torre 2 Apto 804</td><td>moto</td><td>654321</td><td></td><td>FACE-002</td><td><button class="btn-small-edit" onclick="editarResidente(1)">Editar</button><button class="btn-small" onclick="eliminarResidente(1)">Eliminar</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- CAMARAS -->
+            <section id="section-camaras" class="content-section hidden">
+                <div class="panel">
+                    <h3>Registrar camaras</h3>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Nombre</label><input type="text" id="cam-nombre" value="Entrada principal LPR"></div>
+                        <div class="form-group"><label>Tipo</label><select id="cam-tipo"><option>LPR Entrada</option><option>LPR Salida</option><option>Facial</option></select></div>
+                        <div class="form-group"><label>Marca</label><select id="cam-marca"><option>Hikvision</option><option>Dahua</option><option>Axis</option><option>ONVIF</option></select></div>
+                        <div class="form-group"><label>URL/IP/RTSP</label><input type="text" id="cam-url" value="rtsp://usuario:clave@ip/canal" placeholder="rtsp://usuario:clave@ip/canal"></div>
+                        <div class="form-group"><label>Usuario</label><input type="text" id="cam-usuario" placeholder="admin"></div>
+                        <div class="form-group"><label>Clave</label><input type="password" id="cam-clave" placeholder="******"></div>
+                    </div>
+                    <button onclick="agregarCamara()" class="btn-primary">Agregar camara</button>
+                </div>
+                <div class="panel">
+                    <h3>Camaras registradas</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Nombre</th><th>Tipo</th><th>Marca</th><th>URL/IP</th><th>Estado</th><th>Accion</th></tr></thead>
+                        <tbody id="tabla-camaras">
+                            <tr><td>Entrada principal LPR</td><td>LPR Entrada</td><td>Hikvision</td><td>rtsp://192.168.1.10</td><td><span class="badge-success">Lista</span></td><td><button class="btn-small" onclick="eliminarCamara(0)">Eliminar</button></td></tr>
+                            <tr><td>Facial porteria</td><td>Facial</td><td>ONVIF</td><td>rtsp://192.168.1.11</td><td><span class="badge-success">Lista</span></td><td><button class="btn-small" onclick="eliminarCamara(1)">Eliminar</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TICKET DE COBRO -->
+            <section id="section-ticket" class="content-section hidden">
+                <div class="ticket-container">
+                    <div class="ticket-form">
+                        <h3>Datos para la tiquetera de cobro</h3>
+                        <div class="form-grid">
+                            <div class="form-group"><label>Nombre unidad/empresa</label><input type="text" id="ticket-nombre" value="Unidad Residencial"></div>
+                            <div class="form-group"><label>NIT</label><input type="text" id="ticket-nit" value="NIT" placeholder="NIT"></div>
+                            <div class="form-group"><label>Telefono</label><input type="text" id="ticket-telefono" placeholder="Telefono"></div>
+                            <div class="form-group"><label>Direccion</label><input type="text" id="ticket-direccion" placeholder="Direccion"></div>
+                            <div class="form-group"><label>Correo</label><input type="text" id="ticket-correo" value="correo@dominio.com" placeholder="correo@dominio.com"></div>
+                            <div class="form-group"><label>Logo</label><input type="file" id="ticket-logo" accept="image/*" onchange="onLogoSelect()"></div>
+                            <div class="form-group full-width"><label>Mensaje final</label><input type="text" id="ticket-mensaje" value="Gracias por su pago. Conserve este comprobante."></div>
+                        </div>
+                        <div class="btn-group">
+                            <button onclick="guardarTicketConfig()" class="btn-primary">Guardar datos de tiquetera</button>
+                            <button onclick="imprimirTicketPrueba()" class="btn-secondary">Imprimir tiquetera de prueba</button>
+                        </div>
+                    </div>
+                    <div class="ticket-preview-box">
+                        <h3>Vista previa</h3>
+                        <div id="ticket-preview" class="ticket-preview">
+                            <div class="ticket-header">
+                                <div id="ticket-logo-preview" class="ticket-logo"></div>
+                                <h4 id="preview-nombre">Unidad Residencial</h4>
+                                <p id="preview-nit">NIT</p>
+                            </div>
+                            <div class="ticket-divider">------------------------------</div>
+                            <div class="ticket-body">
+                                <p><strong>TICKET DE COBRO</strong></p>
+                                <p>Placa: ABC-123</p>
+                                <p>Tipo: carro</p>
+                                <p>Modalidad: Visitante</p>
+                                <p>Apto/Destino: Torre 1 Apto 101</p>
+                                <p>Ingreso: 21/5/2026, 2:23:03 p.m.</p>
+                                <p>Salida: 21/5/2026, 9:23:03 p.m.</p>
+                                <p>Tiempo: 7.00 horas</p>
+                                <p>Tarifa/hora: $3.000</p>
+                            </div>
+                            <div class="ticket-divider">------------------------------</div>
+                            <div class="ticket-total"><p><strong>Total a pagar: $6.000</strong></p></div>
+                            <div class="ticket-divider">------------------------------</div>
+                            <div class="ticket-footer"><p id="preview-mensaje">Gracias por su pago. Conserve este comprobante.</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VEHICULOS CON COBRO PENDIENTE -->
+                <div class="panel" style="margin-top:24px;">
+                    <div class="panel-header">
+                        <h3>Vehiculos con cobro pendiente</h3>
+                        <p class="help-text">Solo se muestran vehiculos que han superado su tiempo autorizado y tienen cobro pendiente.</p>
+                    </div>
+                    <table class="data-table">
+                        <thead><tr><th>Placa</th><th>Tipo</th><th>Modalidad</th><th>Destino</th><th>Tiempo extra</th><th>Cobro</th><th>Accion</th></tr></thead>
+                        <tbody id="ticket-list-cobros"><tr><td colspan="7" class="empty">Sin vehiculos con cobro pendiente</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- HISTORIAL COMPLETO -->
+            <section id="section-historial" class="content-section hidden">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Historial completo de registros</h3>
+                        <div class="filters">
+                            <input type="text" id="historial-search" placeholder="Buscar por placa, conductor o destino..." onkeyup="filtrarHistorial()" style="min-width:280px;">
+                            <input type="date" id="filtro-fecha" onchange="filtrarHistorial()">
+                            <select id="filtro-modalidad" onchange="filtrarHistorial()">
+                                <option value="">Todas las modalidades</option>
+                                <option value="residente">Residente</option>
+                                <option value="visitante">Visitante</option>
+                                <option value="airbnb">Airbnb</option>
+                            </select>
+                            <button onclick="exportarHistorial()" class="btn-secondary">Exportar CSV</button>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead><tr><th>Placa</th><th>Tipo</th><th>Modalidad</th><th>Conductor</th><th>Destino</th><th>Ingreso</th><th>Salida</th><th>Tiempo</th><th>Cobro</th><th>Estado alerta</th><th>Ticket</th></tr></thead>
+                        <tbody id="tabla-historial"><tr><td colspan="11" class="empty">Sin registros en el historial</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ALERTAS -->
+            <section id="section-alertas" class="content-section hidden">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Alertas del sistema</h3>
+                        <div class="filters">
+                            <input type="date" id="alerta-fecha-desde" onchange="filtrarAlertas()">
+                            <input type="date" id="alerta-fecha-hasta" onchange="filtrarAlertas()">
+                            <select id="alerta-estado" onchange="filtrarAlertas()">
+                                <option value="">Todas</option>
+                                <option value="activas">Activas</option>
+                                <option value="vistas">Vistas/Resueltas</option>
+                            </select>
+                            <select id="alerta-modalidad" onchange="filtrarAlertas()">
+                                <option value="">Todas las modalidades</option>
+                                <option value="residente">Residente</option>
+                                <option value="visitante">Visitante</option>
+                                <option value="airbnb">Airbnb</option>
+                            </select>
+                            <button onclick="checkAlerts(); renderAlertas(); alert('Alertas verificadas manualmente');" class="btn-primary">🔄 Verificar alertas ahora</button>
+                            <button onclick="exportarAlertas()" class="btn-secondary">Exportar alertas CSV</button>
+                            <button onclick="limpiarAlertas()" class="btn-ghost">Marcar todas como vistas</button>
+                        </div>
+                    </div>
+                    <div id="lista-alertas" class="alert-list-full"><p class="empty">Sin alertas registradas</p></div>
+                </div>
+            </section>
+
+            <!-- CONFIGURACION -->
+            <section id="section-config" class="content-section hidden">
+                <div class="panel">
+                    <h3>Configuracion general</h3>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Cupos carros</label><input type="number" id="config-carros" value="150"></div>
+                        <div class="form-group"><label>Cupos motos</label><input type="number" id="config-motos" value="300"></div>
+                        <div class="form-group"><label>Tarifa por hora</label><input type="number" id="config-tarifa" value="3000"></div>
+                        <div class="form-group"><label>No registrado alerta despues de (minutos)</label><input type="number" id="config-alerta" value="300" placeholder="Ej: 300 = 5 horas"></div>
+                        <div class="form-group"><label>Usuario de acceso</label><input type="text" id="config-usuario" value="admin"></div>
+                        <div class="form-group"><label>Nueva contrasena</label><input type="password" id="config-clave" placeholder="Dejar en blanco para mantener"></div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Tiempo autorizado por modalidad</h3>
+                    <p class="help-text">Configure el tiempo maximo autorizado para cada tipo de vehiculo antes de generar cobros.</p>
+
+                    <div class="tiempo-config-box">
+                        <h4>Residentes</h4>
+                        <div class="form-grid tiempo-grid">
+                            <div class="form-group tiempo-box"><label>Dias</label><input type="number" id="config-res-dias" value="0" min="0"></div>
+                            <div class="form-group tiempo-box"><label>Horas</label><input type="number" id="config-res-horas" value="0" min="0" max="23"></div>
+                            <div class="form-group tiempo-box"><label>Minutos</label><input type="number" id="config-res-minutos" value="0" min="0" max="59"></div>
+                        </div>
+                    </div>
+
+                    <div class="tiempo-config-box">
+                        <h4>Visitantes</h4>
+                        <div class="form-grid tiempo-grid">
+                            <div class="form-group tiempo-box"><label>Dias</label><input type="number" id="config-vis-dias" value="0" min="0"></div>
+                            <div class="form-group tiempo-box"><label>Horas</label><input type="number" id="config-vis-horas" value="0" min="0" max="23"></div>
+                            <div class="form-group tiempo-box"><label>Minutos</label><input type="number" id="config-vis-minutos" value="0" min="0" max="59"></div>
+                        </div>
+                    </div>
+
+                    <div class="tiempo-config-box">
+                        <h4>Airbnb</h4>
+                        <div class="form-grid tiempo-grid">
+                            <div class="form-group tiempo-box"><label>Dias</label><input type="number" id="config-air-dias" value="0" min="0"></div>
+                            <div class="form-group tiempo-box"><label>Horas</label><input type="number" id="config-air-horas" value="0" min="0" max="23"></div>
+                            <div class="form-group tiempo-box"><label>Minutos</label><input type="number" id="config-air-minutos" value="0" min="0" max="59"></div>
+                        </div>
+                    </div>
+
+                    <button onclick="guardarConfig()" class="btn-primary" style="margin-top:20px;">Guardar configuracion</button>
+                </div>
+            </section>
+
+            <!-- PANTALLA DE DISPONIBILIDAD -->
+            <section id="section-disponibilidad" class="content-section hidden">
+                <div class="panel disponibilidad-panel">
+                    <h3 style="text-align:center;font-size:24px;margin-bottom:32px;">Disponibilidad de Parqueadero</h3>
+
+                    <div class="disponibilidad-grid">
+                        <div class="disp-card">
+                            <div class="disp-icon">🚗</div>
+                            <div class="disp-label">Carros disponibles</div>
+                            <div class="disp-value" id="disp-carros-disp">150</div>
+                            <div class="disp-total">de <span id="disp-carros-total">150</span> totales</div>
+                            <div class="disp-bar-container">
+                                <div class="disp-bar" id="disp-carros-bar" style="width:0%"></div>
+                            </div>
+                            <div class="disp-ocup">Ocupacion: <span id="disp-carros-ocup">0%</span></div>
+                        </div>
+
+                        <div class="disp-card">
+                            <div class="disp-icon">🏍️</div>
+                            <div class="disp-label">Motos disponibles</div>
+                            <div class="disp-value" id="disp-motos-disp">300</div>
+                            <div class="disp-total">de <span id="disp-motos-total">300</span> totales</div>
+                            <div class="disp-bar-container">
+                                <div class="disp-bar" id="disp-motos-bar" style="width:0%"></div>
+                            </div>
+                            <div class="disp-ocup">Ocupacion: <span id="disp-motos-ocup">0%</span></div>
+                        </div>
+                    </div>
+
+                    <div class="disp-leyenda">
+                        <div class="disp-leyenda-item"><span class="disp-leyenda-color" style="background:#00ff88;"></span> Disponible</div>
+                        <div class="disp-leyenda-item"><span class="disp-leyenda-color" style="background:#f59e0b;"></span> Ocupacion media</div>
+                        <div class="disp-leyenda-item"><span class="disp-leyenda-color" style="background:#ef4444;"></span> Casi lleno</div>
+                    </div>
+
+                    <p style="text-align:center;color:#94a3b8;margin-top:24px;font-size:13px;">
+                        Esta pantalla puede proyectarse en una TV o monitor en la entrada del parqueadero.<br>
+                        Use F11 para pantalla completa en el navegador.
+                    </p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- TICKET PRINT MODAL -->
+    <div id="ticket-modal" class="modal hidden">
+        <div class="modal-content">
+            <div id="ticket-print-content" class="ticket-print"></div>
+            <div class="modal-actions">
+                <button onclick="cerrarTicket()" class="btn-ghost">Cerrar</button>
+                <button onclick="window.print()" class="btn-primary">🖨️ Imprimir / Guardar PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SALIDA MODAL -->
+    <div id="salida-modal" class="modal hidden">
+        <div class="modal-content salida-modal">
+            <h3>Registrar salida</h3>
+            <div id="salida-info"></div>
+            <div class="modal-actions">
+                <button onclick="cerrarSalida()" class="btn-ghost">Cancelar</button>
+                <button onclick="confirmarSalida()" class="btn-primary">Confirmar salida y generar ticket</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+{
+  "name": "parqueadero-inteligente",
+  "version": "1.0.0",
+  "description": "Software Inteligente de Parqueadero - LPR, Facial, Cobros y Tiquetera",
+  "main": "main.js",
+  "author": "Tu Empresa",
+  "license": "PROPRIETARY",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win",
+    "build-mac": "electron-builder --mac",
+    "build-all": "electron-builder --mac --win",
+    "dist": "electron-builder --publish=never"
+  },
+  "build": {
+    "appId": "com.tuempresa.parqueadero.inteligente",
+    "productName": "Parqueadero Inteligente",
+    "copyright": "Copyright © 2026",
+    "directories": {
+      "output": "dist",
+      "buildResources": "iconos"
+    },
+    "files": [
+      "main.js",
+      "index.html",
+      "app.js",
+      "styles.css",
+      "iconos/**/*",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "iconos/icon.ico",
+      "publisherName": "Tu Empresa"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "iconos/icon.png",
+      "category": "public.app-category.business",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Parqueadero Inteligente",
+      "installerIcon": "iconos/icon.ico",
+      "uninstallerIcon": "iconos/icon.ico",
+      "installerHeaderIcon": "iconos/icon.ico",
+      "artifactName": "Parqueadero-Inteligente-Setup-${version}.exe",
+      "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "artifactName": "Parqueadero-Inteligente-Portable-${version}.exe"
+    },
+    "dmg": {
+      "artifactName": "Parqueadero-Inteligente-${version}.dmg",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  }
+}
