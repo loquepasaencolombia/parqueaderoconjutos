@@ -1,3 +1,37 @@
+// ===== PERSISTENCIA DE DATOS (Electron IPC) =====
+const { ipcRenderer } = require('electron');
+
+async function guardarDatos() {
+    try {
+        await ipcRenderer.invoke('guardar-datos', JSON.parse(JSON.stringify(state)));
+    } catch (e) {
+        console.error('Error guardando datos:', e);
+    }
+}
+
+async function cargarDatos() {
+    try {
+        const resultado = await ipcRenderer.invoke('cargar-datos');
+        if (resultado.success && resultado.datos) {
+            const datos = resultado.datos;
+            if (datos.config) state.config = datos.config;
+            if (datos.ticketConfig) state.ticketConfig = datos.ticketConfig;
+            if (datos.residentes) state.residentes = datos.residentes;
+            if (datos.camaras) state.camaras = datos.camaras;
+            if (datos.vehiculosDentro) state.vehiculosDentro = datos.vehiculosDentro;
+            if (datos.historial) state.historial = datos.historial;
+            if (datos.alertas) state.alertas = datos.alertas;
+            if (datos.licencia) state.licencia = datos.licencia;
+            return true;
+        }
+    } catch (e) {
+        console.error('Error cargando datos:', e);
+    }
+    return false;
+}
+
+// Auto-guardado cada 30 segundos
+setInterval(guardarDatos, 30000);
 // ===== STATE =====
 const state = {
     user: null,
