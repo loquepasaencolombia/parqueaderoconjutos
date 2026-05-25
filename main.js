@@ -2,6 +2,8 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const { autoUpdater } = require('electron-updater');
+const log = require('electron-log');
 
 let mainWindow;
 
@@ -56,6 +58,54 @@ function saveLicense(licenseData) {
     } catch (err) { console.error('Error guardando licencia:', err); return false; }
 }
 
+
+// ===== AUTO UPDATER =====
+// ========================
+function setupAutoUpdater() {
+    if (!app.isPackaged) {
+        log.info('Modo desarrollo - auto-updater desactivado');
+        return;
+    }
+
+    autoUpdater.logger = log;
+    autoUpdater.logger.transports.file.level = 'info';
+
+    setTimeout(() => {
+        autoUpdater.checkForUpdatesAndNotify().catch(err => {
+            log.error('Error checking updates:', err);
+        });
+    }, 5000);
+
+    setInterval(() => {
+        autoUpdater.checkForUpdatesAndNotify().catch(err => {
+            log.error('Error checking updates:', err);
+        });
+    }, 30 * 60 * 1000);
+
+    autoUpdater.on('update-available', () => {
+        log.info('Actualización disponible');
+    });
+
+    autoUpdater.on('update-downloaded', () => {
+        dialog.showMessageBox({
+            type: 'question',
+            buttons: ['Reiniciar ahora', 'Más tarde'],
+            defaultId: 0,
+            title: 'Actualización lista',
+            message: 'Se descargó una nueva versión.',
+            detail: '¿Reiniciar para instalar ahora?',
+            cancelId: 1
+        }).then((result) => {
+            if (result.response === 0) {
+                autoUpdater.quitAndInstall(false, true);
+            }
+        });
+    });
+
+    autoUpdater.on('error', (err) => {
+        log.error('Error en auto-updater:', err);
+    });
+}
 // ============================================================
 // CREAR VENTANA PRINCIPAL
 // ============================================================
@@ -161,7 +211,10 @@ function createWindow() {
     mainWindow.on('closed', () => { mainWindow = null; });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+    createWindow();
+    setupAutoUpdater();
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
