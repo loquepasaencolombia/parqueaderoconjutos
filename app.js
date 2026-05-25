@@ -35,6 +35,7 @@ setInterval(guardarDatos, 30000);
 // ===== STATE =====
 const state = {
     user: null,
+    licencia: null,
     config: {
         cuposCarros: 150,
         cuposMotos: 300,
