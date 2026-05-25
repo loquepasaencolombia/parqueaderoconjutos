@@ -54,7 +54,7 @@
           "arch": ["x64", "arm64"]
         }
       ],
-      "icon": "iconos/icon.png",
+      "icon": "iconos/icon.icns",
       "category": "public.app-category.business",
       "hardenedRuntime": true,
       "gatekeeperAssess": false
