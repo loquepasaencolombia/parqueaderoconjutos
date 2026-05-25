@@ -2,36 +2,39 @@ name: Build Installers
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
-  build-mac:
-    runs-on: macos-latest
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm install
-      - run: npx electron-packager . "Parqueadero Inteligente" --platform=darwin --arch=x64 --icon=iconos/icon.icns --out=dist --overwrite
-      - run: npm install -g create-dmg
-      - run: create-dmg "dist/Parqueadero Inteligente-darwin-x64/Parqueadero Inteligente.app" dist/ || true
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Parqueadero-Mac
-          path: dist/*.dmg
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  build-win:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - run: npm install
-      - run: npx electron-packager . "Parqueadero Inteligente" --platform=win32 --arch=x64 --icon=iconos/icon.ico --out=dist --overwrite
-      - uses: actions/upload-artifact@v4
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build and Publish Release
+        run: npx electron-builder --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: Parqueadero-Windows
-          path: dist/**/*.exe
+          name: installers-${{ matrix.os }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.zip
