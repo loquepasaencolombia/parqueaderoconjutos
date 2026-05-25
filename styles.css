@@ -70,6 +70,91 @@ body {
     font-size: 12px; margin-top: 12px;
 }
 
+/* ===== LICENSE SCREEN ===== */
+.license-screen {
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 100%);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1001;
+}
+.license-box {
+    background: rgba(15, 30, 55, 0.95);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 20px;
+    padding: 48px;
+    width: 100%; max-width: 480px;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+    backdrop-filter: blur(20px);
+}
+.license-box.licensed {
+    border-color: rgba(0, 255, 136, 0.3);
+}
+.license-box h2 {
+    font-size: 22px; font-weight: 700;
+    text-align: center; margin-bottom: 8px;
+    color: #fff;
+}
+.license-status {
+    text-align: center;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    font-weight: 500;
+}
+.license-status.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.license-status.success {
+    background: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+}
+.license-status.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+.license-form label {
+    display: block; font-size: 13px;
+    color: #94a3b8; margin-bottom: 6px;
+    font-weight: 500;
+}
+.license-form input {
+    width: 100%; padding: 14px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: #fff; font-size: 15px;
+    margin-bottom: 16px;
+    transition: all 0.3s;
+}
+.license-form input:focus {
+    outline: none;
+    border-color: #00d4ff;
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+}
+.license-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+}
+.license-buttons .btn-row {
+    display: flex;
+    gap: 12px;
+}
+.license-info {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
 /* ===== APP LAYOUT ===== */
 .app {
     display: flex; min-height: 100vh;
@@ -156,6 +241,15 @@ body {
 }
 .btn-logout:hover {
     background: rgba(239, 68, 68, 0.2);
+}
+.license-footer {
+    padding: 8px 20px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    text-align: center;
+}
+.license-footer span {
+    font-size: 11px;
+    color: #64748b;
 }
 
 /* ===== MAIN CONTENT ===== */
@@ -288,7 +382,7 @@ body {
     background: #0a1628; color: #fff;
 }
 
-/* ===== TIEMPO FIELDS (NUEVO) ===== */
+/* ===== TIEMPO FIELDS ===== */
 .tiempo-fields {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -671,6 +765,8 @@ body {
 .alert-actions {
     display: flex;
     gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 .alert-actions button {
     padding: 6px 12px;
@@ -688,6 +784,18 @@ body {
     background: rgba(0, 212, 255, 0.1);
     border: 1px solid rgba(0, 212, 255, 0.3);
     color: #00d4ff;
+}
+.btn-alert-delete {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn-alert-delete:hover {
+    background: rgba(239, 68, 68, 0.2);
 }
 
 /* ===== BADGES ===== */
@@ -849,4 +957,6 @@ body {
     .tiempo-fields { grid-template-columns: 1fr; }
     .tiempo-grid { grid-template-columns: 1fr !important; }
     .disp-value { font-size: 48px; }
+    .license-box { padding: 32px 24px; }
+    .license-buttons .btn-row { flex-direction: column; }
 }
