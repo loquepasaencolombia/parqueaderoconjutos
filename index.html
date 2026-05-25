@@ -8,6 +8,33 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- LICENSE SCREEN -->
+    <div id="license-screen" class="license-screen hidden">
+        <div class="license-box" id="license-box">
+            <div class="login-logo">
+                <div class="logo-icon">LPR</div>
+            </div>
+            <h2>Activación de Licencia</h2>
+            <div id="license-status" class="license-status error">Sin licencia registrada</div>
+            <div class="license-form">
+                <label>Email / Empresa</label>
+                <input type="email" id="license-email" placeholder="tu@empresa.com">
+                <label>Clave de licencia</label>
+                <input type="text" id="license-key" placeholder="XXXX-XXXX-XXXX-XXXX">
+                <label>Fecha de expiración</label>
+                <input type="date" id="license-expiry">
+            </div>
+            <div class="license-buttons">
+                <button onclick="activateLicenseFromUI()" class="btn-primary">Activar licencia</button>
+                <div class="btn-row">
+                    <button onclick="generateDemoLicenseFromUI()" class="btn-secondary">Generar demo 30 días</button>
+                    <button onclick="backToLogin()" class="btn-ghost">Volver al login</button>
+                </div>
+            </div>
+            <p class="license-info">La licencia se guarda localmente en este equipo.</p>
+        </div>
+    </div>
+
     <!-- LOGIN SCREEN -->
     <div id="login-screen" class="login-screen">
         <div class="login-box">
@@ -72,6 +99,9 @@
             </nav>
             <div class="sidebar-footer">
                 <button onclick="doLogout()" class="btn-logout">Cerrar sesion</button>
+            </div>
+            <div class="license-footer">
+                <span id="license-info">Licencia: No activada</span>
             </div>
         </aside>
 
