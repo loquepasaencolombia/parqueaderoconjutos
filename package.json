@@ -11,7 +11,7 @@
     "build-win": "electron-builder --win",
     "build-mac": "electron-builder --mac",
     "build-all": "electron-builder --mac --win",
-    "dist": "electron-builder --publish=never"
+    "dist": "electron-builder --publish always"
   },
   "build": {
     "appId": "com.tuempresa.parqueadero.inteligente",
@@ -21,6 +21,12 @@
       "output": "dist",
       "buildResources": "iconos"
     },
+    "publish": {
+      "provider": "github",
+      "owner": "loquepasaencolombia",
+      "repo": "parqueaderoconjuntos",
+      "releaseType": "release"
+    }
     "files": [
       "main.js",
       "index.html",
@@ -89,6 +95,11 @@
         }
       ]
     }
+    ,
+  "dependencies": {
+    "electron-updater": "^6.3.9",
+    "electron-log": "^5.2.0"
+  }
   },
   "devDependencies": {
     "electron": "^28.0.0",
