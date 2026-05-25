@@ -59,4 +59,4 @@ Los instaladores se generarán en la carpeta `dist/`.
 ✅ Exportación CSV de historial
 
 ## Soporte
-Para soporte técnico contactar a: soporte@tuempresa.com
+Para soporte técnico contactar a: gerencia@loquepasa.co
