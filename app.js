@@ -311,6 +311,7 @@ function registrarIngreso() {
     }
 
     state.vehiculosDentro.push(vehiculo);
+    guardarDatos();
     updateDashboard();
     renderVehiculosDentro();
     limpiarIngreso();
@@ -511,6 +512,7 @@ function confirmarSalida() {
     state.historial.unshift(registro);
 
     state.vehiculosDentro = state.vehiculosDentro.filter(v => v.id !== vehiculo.id);
+    guardarDatos();
 
     generarTicketSalida(vehiculo, cobro, minutos);
 
@@ -600,20 +602,30 @@ function onCSVSelect() {
 function importarCSV() {
     const file = document.getElementById('csv-file').files[0];
     if (!file) { alert('Seleccione un archivo CSV'); return; }
+    
+    const modo = confirm(
+        'MODO DE IMPORTACION\n\n' +
+        'Presione ACEPTAR para: Actualizar existentes + Agregar nuevos\n' +
+        'Presione CANCELAR para: Solo agregar nuevos (no modificar existentes)'
+    ) ? 'actualizar' : 'agregar';
+    
     const reader = new FileReader();
     reader.onload = function(e) {
         const text = e.target.result;
         const lines = text.split('\n');
         const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
         let importados = 0;
+        let actualizados = 0;
+
         for (let i = 1; i < lines.length; i++) {
             if (!lines[i].trim()) continue;
             const cols = lines[i].split(',');
             const r = {};
             headers.forEach((h, idx) => { r[h] = cols[idx] ? cols[idx].trim() : ''; });
+
             if (r.placa) {
                 const placaUpper = r.placa.toUpperCase();
-                const existente = state.residentes.find(res => res.placa.toUpperCase() === placaUpper);
+                const existenteIdx = state.residentes.findIndex(res => res.placa.toUpperCase() === placaUpper);
                 const nuevo = {
                     placa: placaUpper,
                     propietario: r.propietario || r.nombre || 'Sin nombre',
@@ -623,16 +635,22 @@ function importarCSV() {
                     telefono: r.telefono || '',
                     rostro_id: r.rostro_id || ''
                 };
-                if (existente) {
-                    Object.assign(existente, nuevo);
+
+                if (existenteIdx >= 0) {
+                    if (modo === 'actualizar') {
+                        state.residentes[existenteIdx] = { ...state.residentes[existenteIdx], ...nuevo };
+                        actualizados++;
+                    }
                 } else {
                     state.residentes.push(nuevo);
                     importados++;
                 }
             }
         }
+
+        guardarDatos();
         renderResidentes();
-        alert('Residentes procesados. Nuevos: ' + importados + ', Actualizados: ' + (lines.length - 1 - importados));
+        alert('Importacion completada.\nNuevos: ' + importados + '\nActualizados: ' + actualizados + '\nTotal en sistema: ' + state.residentes.length);
     };
     reader.readAsText(file);
 }
@@ -666,6 +684,7 @@ function reemplazarCSV() {
         }
         state.residentes = nuevos;
         renderResidentes();
+        guardarDatos();
         alert('Base de residentes reemplazada. ' + nuevos.length + ' residentes cargados. Historial de cobros conservado.');
     };
     reader.readAsText(file);
@@ -704,6 +723,7 @@ function guardarResidente() {
     }
 
     renderResidentes();
+    guardarDatos();
     limpiarFormResidente();
     alert('Residente guardado correctamente');
 }
@@ -745,12 +765,14 @@ function limpiarFormResidente() {
 function eliminarResidente(index) {
     if (!confirm('Eliminar este residente?')) return;
     state.residentes.splice(index, 1);
+    guardarDatos();
     renderResidentes();
 }
 
 function eliminarTodosResidentes() {
     if (!confirm('Eliminar TODOS los residentes? El historial de cobros se conserva.')) return;
     state.residentes = [];
+    guardarDatos();
     renderResidentes();
 }
 
@@ -780,6 +802,7 @@ function agregarCamara() {
     const clave = document.getElementById('cam-clave').value;
     if (!nombre || !url) { alert('Nombre y URL son obligatorios'); return; }
     state.camaras.push({ nombre, tipo, marca, url, usuario, clave, estado: 'Lista' });
+    guardarDatos();
     renderCamaras();
     document.getElementById('cam-nombre').value = '';
     document.getElementById('cam-url').value = '';
@@ -787,6 +810,7 @@ function agregarCamara() {
 }
 function eliminarCamara(index) {
     state.camaras.splice(index, 1);
+    guardarDatos();
     renderCamaras();
 }
 
@@ -802,6 +826,7 @@ function guardarTicketConfig() {
     document.getElementById('preview-nombre').textContent = state.ticketConfig.nombre;
     document.getElementById('preview-nit').textContent = state.ticketConfig.nit;
     document.getElementById('preview-mensaje').textContent = state.ticketConfig.mensaje;
+    guardarDatos();
     alert('Configuracion de ticket guardada');
 }
 function onLogoSelect() {
@@ -1018,6 +1043,7 @@ function checkAlerts() {
                     cobro: cobroActual
                 });
             }
+            guardarDatos();
             updateDashboard();
             renderVehiculosDentro();
         }
@@ -1057,7 +1083,7 @@ function renderAlertas() {
     container.innerHTML = filtrado.slice().reverse().map(a => {
         const clase = a.vista ? 'seen' : '';
         const modalidadBadge = a.modalidad ? '<span class="badge-success" style="margin-right:8px;">' + capitalize(a.modalidad) + '</span>' : '';
-        return '<div class="alert-item ' + a.tipo + ' ' + clase + '"><div style="flex:1">' + modalidadBadge + '<span class="alert-text">' + a.mensaje + '</span><br><span class="alert-time">' + formatDateTime(a.fecha) + '</span><br><span style="font-size:12px;color:#94a3b8">Cobro estimado: $' + (a.cobro || 0).toLocaleString() + '</span></div><div class="alert-actions">' + (a.vista ? '' : '<button class="btn-alert-ticket" onclick="generarTicketAlerta(' + a.id + ')">Generar ticket</button>') + '<button class="btn-alert-historial" onclick="moverAlertaAHistorial(' + a.id + ')">A historial</button></div></div>';
+        return '<div class="alert-item ' + a.tipo + ' ' + clase + '"><div style="flex:1">' + modalidadBadge + '<span class="alert-text">' + a.mensaje + '</span><br><span class="alert-time">' + formatDateTime(a.fecha) + '</span><br><span style="font-size:12px;color:#94a3b8">Cobro estimado: $' + (a.cobro || 0).toLocaleString() + '</span></div><div class="alert-actions">' + (a.vista ? '' : '<button class="btn-alert-ticket" onclick="generarTicketAlerta(' + a.id + ')">Generar ticket</button>') + '<button class="btn-alert-historial" onclick="moverAlertaAHistorial(' + a.id + ')">A historial</button><button class="btn-alert-eliminar" onclick="eliminarAlerta(' + a.id + ')" title="Eliminar alerta">🗑️</button></div></div>';
     }).join('');
 }
 function filtrarAlertas() {
@@ -1103,7 +1129,8 @@ function generarTicketAlerta(alertaId) {
     // 4. Eliminar alerta
     state.alertas = state.alertas.filter(a => a.id !== alertaId);
 
-    // 5. Actualizar todo
+    // 5. Guardar y actualizar todo
+    guardarDatos();
     updateDashboard();
     renderVehiculosDentro();
     renderHistorial();
@@ -1142,6 +1169,7 @@ function moverAlertaAHistorial(alertaId) {
 
     state.vehiculosDentro = state.vehiculosDentro.filter(v => v.id !== vehiculo.id);
     state.alertas = state.alertas.filter(a => a.id !== alertaId);
+    guardarDatos();
 
     updateDashboard();
     renderVehiculosDentro();
@@ -1166,8 +1194,17 @@ function exportarAlertas() {
 function limpiarAlertas() {
     state.alertas.forEach(a => a.vista = true);
     state.vehiculosDentro.forEach(v => v.alertaVista = true);
+    guardarDatos();
     updateDashboard();
     renderAlertas();
+}
+
+function eliminarAlerta(alertaId) {
+    if (!confirm('Eliminar esta alerta?')) return;
+    state.alertas = state.alertas.filter(a => a.id !== alertaId);
+    guardarDatos();
+    renderAlertas();
+    updateDashboard();
 }
 
 // ===== CONFIG =====
@@ -1222,6 +1259,7 @@ function guardarConfig() {
 
     document.getElementById('stat-carros-aut').textContent = state.config.cuposCarros;
     document.getElementById('stat-motos-aut').textContent = state.config.cuposMotos;
+    guardarDatos();
     alert('Configuracion guardada correctamente');
 }
 
@@ -1257,7 +1295,18 @@ function renderDisponibilidad() {
 }
 
 // ===== INIT =====
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    await cargarDatos();
+
+    document.getElementById('login-user').value = state.config.usuario || 'admin';
+
+    if (state.ticketConfig && state.ticketConfig.logo) {
+        const logoPreview = document.getElementById('ticket-logo-preview');
+        if (logoPreview) {
+            logoPreview.innerHTML = '<img src="' + state.ticketConfig.logo + '" alt="Logo">';
+        }
+    }
+
     document.getElementById('login-pass').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') doLogin();
     });
